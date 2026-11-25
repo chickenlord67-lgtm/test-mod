@@ -1,0 +1,12 @@
+{
+    "geode": "2.0.0",
+    "gd": {
+        "android": "2.208"
+    },
+    "id": "sussy.sussymod",
+    "name": "SussyMod",
+    "version": "v1.0.0",
+    "developer": "sussy",
+    "description": "noclip / startpos / hitboxes / speed / jump",
+    "platforms": ["android"]
+}
