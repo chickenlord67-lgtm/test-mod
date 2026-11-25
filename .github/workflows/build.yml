@@ -1,0 +1,55 @@
+name: Build SussyMod
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup NDK r26b
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r26b
+          add-to-path: true
+
+      - name: Clone Geode SDK
+        run: |
+          git clone --depth 1 --recurse-submodules \
+            https://github.com/geode-sdk/geode.git $HOME/geode-sdk
+          echo "GEODE_SDK=$HOME/geode-sdk" >> $GITHUB_ENV
+
+      - name: Install Ninja
+        run: sudo apt-get install -y ninja-build
+
+      - name: Configure CMake
+        run: |
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake \
+            -DANDROID_ABI=arm64-v8a \
+            -DANDROID_PLATFORM=android-21 \
+            -G Ninja
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Package .geode
+        run: |
+          mkdir -p pkg
+          cp mod.json pkg/
+          cp build/libSussyMod.so pkg/
+          cd pkg && zip -r ../SussyMod.geode * && cd ..
+
+      - name: Upload SussyMod.geode
+        uses: actions/upload-artifact@v4
+        with:
+          name: SussyMod
+          path: SussyMod.geode
+          retention-days: 30
